@@ -1,0 +1,31 @@
+id: java-tolowercase-default-locale-openjdk-jmod
+title: "jmod \"list\" mode and jimage list --help not recognised when the JVM default locale is Turkish"
+language: java
+library: "stdlib (jdk.jlink: jmod, jimage)"
+operation: lower
+letters: ["I", "ı"]
+locale_dependent: true
+input: "\"LIST\".toLowerCase() with default locale tr_TR"
+expected: "\"list\""
+actual: "\"lıst\" (dotless ı), so the lowercase mode name never equals \"list\" and the tool reports an unknown mode"
+reproduction:
+  command: |
+    cat > J.java <<'EOF2'
+    public class J { public static void main(String[] a){
+      System.out.println("LIST".toLowerCase() + " " + "list".equals("LIST".toLowerCase()) + " " + "LIST".toLowerCase(java.util.Locale.ROOT)); } }
+    EOF2
+    java -Duser.language=tr -Duser.country=TR -Dstdout.encoding=UTF-8 J.java
+    # prints: lıst false list
+  environment: "OpenJDK 21.0.12.1, Linux"
+upstream:
+  url: https://github.com/openjdk/jdk/pull/12281
+  status: fixed
+  fix: "Pass an explicit locale for machine-readable strings: toLowerCase(Locale.ROOT) in JmodTask, JImageTask, JlinkTask, VersionPropsPlugin (JDK-8301569, integrated 2023-06-29, commit 6f58ab2)."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "The String.toLowerCase() mechanism is reproduced; the jmod/jimage command itself was not run."
+references:
+  - https://bugs.openjdk.org/browse/JDK-8301569
+  - https://bugs.openjdk.org/browse/JDK-8159420

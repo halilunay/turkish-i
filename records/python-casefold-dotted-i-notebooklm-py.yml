@@ -1,0 +1,27 @@
+id: python-casefold-dotted-i-notebooklm-py
+title: "Title lookup by casefold() cannot find \"İstanbul notları\" with the query \"istanbul\""
+language: python
+library: notebooklm-py
+operation: casefold
+letters: ["İ", "i"]
+locale_dependent: false
+input: "title \"İstanbul notları\", query \"istanbul\""
+expected: "query matches the title (same way \"STRASSE\" matches \"Straße\" in the same code)"
+actual: "NotebookNotFoundError; casefold() turns İ into \"i\" + U+0307, so the folded title starts with \"i̇\" and never equals or prefixes the folded query"
+reproduction:
+  command: |
+    python3 -c 't="İstanbul notları"; q="istanbul"; print(t.casefold().startswith(q.casefold()), repr(t.casefold()))'
+    # prints: False 'i̇stanbul notları'
+  environment: "Python 3.13.16, Linux; upstream reproduced on Python 3.11, notebooklm-py main @ 1d8920f"
+upstream:
+  url: https://github.com/teng-lin/notebooklm-py/issues/2476
+  status: open
+  fix: "Open PR #2477 adds casefold_title(): text.casefold().replace(\"i\\u0307\", \"i\"), i.e. drop the combining dot after casefold. Two more call sites (studio title match, download --name filter) are still uncovered as of 2026-10-12."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "Runtime-level reproduction above; the full project-level reproduction (4 call sites, 204 tests) is in the issue and in PR #2477."
+references:
+  - https://github.com/teng-lin/notebooklm-py/pull/2477
+  - https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt

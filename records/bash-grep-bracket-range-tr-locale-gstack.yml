@@ -1,0 +1,28 @@
+id: bash-grep-bracket-range-tr-locale-gstack
+title: "grep -E '[a-zA-Z0-9_]' rejects every config key containing \"i\" under LANG=tr_TR.UTF-8"
+language: bash
+library: gstack (bin/gstack-config)
+operation: regex-range
+letters: ["i", "ı", "İ"]
+locale_dependent: true
+input: "key \"proactive\" validated with ^[a-zA-Z0-9_]+(@[a-zA-Z0-9]+)?$ under LANG=tr_TR.UTF-8"
+expected: "key accepted (it is plain ASCII)"
+actual: "key rejected: in a Turkish locale the collation order of the POSIX range a-z does not include ASCII \"i\" (it sorts around ı/İ), so get/set fail; skill preambles swallow the error with 2>/dev/null and silently fall back to defaults"
+reproduction:
+  command: |
+    printf proactive | LC_ALL=tr_TR.UTF-8 grep -qE '^[a-zA-Z0-9_]+$' && echo MATCH || echo NOMATCH   # NOMATCH
+    printf proactive | LC_ALL=C          grep -qE '^[a-zA-Z0-9_]+$' && echo MATCH || echo NOMATCH   # MATCH
+    printf telemetry | LC_ALL=tr_TR.UTF-8 grep -qE '^[a-zA-Z0-9_]+$' && echo MATCH || echo NOMATCH   # MATCH (no "i")
+  environment: "GNU grep 3.11, glibc 2.39, Linux; tr_TR.UTF-8 built with `localedef -i tr_TR -f UTF-8`. macOS BSD grep does not reproduce (per upstream fix)."
+upstream:
+  url: https://github.com/garrytan/gstack/issues/2494
+  status: fixed
+  fix: "Pin the validators to the C locale: `LC_ALL=C grep -qE ...` (PR #2506 by Math1987, absorbed into commit 008dd65, v1.64.0.0). Alternative kept out: [[:alnum:]] would also accept non-ASCII letters."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "Reproduced with the same regex as upstream on GNU grep. bash's own [[ =~ ^[a-z]+$ ]] fails the same way under tr_TR.UTF-8."
+references:
+  - https://github.com/garrytan/gstack/pull/2506
+  - https://github.com/garrytan/gstack/commit/008dd65

@@ -1,0 +1,27 @@
+id: python-lower-dotted-i-cpython
+title: "\"İ\".lower() returns two code points (\"i\" + U+0307), so \"KİTAP\".lower() != \"kitap\""
+language: python
+library: stdlib
+operation: lower
+letters: ["İ", "i"]
+locale_dependent: false
+input: "\"İ\" (U+0130), \"KİTAP\""
+expected: "\"i\", \"kitap\" (what a Turkish reader expects)"
+actual: "\"i\\u0307\" (length 2), \"ki̇tap\"; Python 3.2 returned \"i\", 3.3+ follows Unicode SpecialCasing"
+reproduction:
+  command: |
+    python3 -c 's="İ".lower(); print(len(s), [hex(ord(c)) for c in s], "KİTAP".lower() == "kitap")'
+    # prints: 2 ['0x69', '0x307'] False
+  environment: "Python 3.13.16, Linux"
+upstream:
+  url: https://github.com/python/cpython/issues/61454
+  status: by-design
+  fix: "Closed as \"works for me\": lower() has no locale and follows the default Unicode mapping (U+0130 -> 0069 0307). For Turkish text use a locale-aware library (PyICU, Babel) or strip U+0307 after lower()/casefold() when İ/i is the only pair you need."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "bpo-17252 (2013), mirrored as cpython issue 61454."
+references:
+  - https://bugs.python.org/issue17252
+  - https://discuss.python.org/t/peculiar-behaviour-involving-unicode-len-s-0-len-s-0-lower-is-this-expected/24469

@@ -1,0 +1,26 @@
+# Copy this file to records/<language>-<operation-or-api>-<project>.yml and fill every field.
+# Keep it short. One real bug per file. See CONTRIBUTING.md; schema/record.schema.json has the rules.
+id: python-lower-example-project          # must equal the file name without .yml
+title: "lower() turns İ into i + U+0307, so title lookup fails"
+language: python                          # python, javascript, typescript, java, kotlin, csharp, go, rust, ruby, php, bash, sql, c, cpp, swift, dart, elixir, other
+library: example-project                  # project / library / tool; use `stdlib` for the runtime itself
+operation: lower                          # lower, upper, casefold, compare, regex-range, sort, slug, title-case, other
+letters: ["İ", "i"]                       # any of: I, ı, İ, i
+locale_dependent: false                   # true only if it breaks solely under a Turkish locale (tr_TR)
+input: "İstanbul"
+expected: "istanbul"
+actual: "i̇stanbul (i + U+0307, 9 code points instead of 8)"
+reproduction:
+  command: |
+    python3 -c 'print(len("İstanbul".lower()), "istanbul" == "İstanbul".lower())'
+  environment: "Python 3.13, Linux"
+upstream:
+  url: https://github.com/example/project/issues/1
+  status: open                            # open, fixed, wontfix, by-design, unknown
+  fix: "Strip U+0307 after casefold, or use a locale-aware API."
+verification:
+  status: verified                        # verified = you or an AI tool you name ran the command and saw `actual`; else unverified
+  by: your-github-login                   # who ran it. If an AI tool ran it: "<tool> (AI), reviewed by <your-github-login>"
+  date: 2026-01-01
+  notes: ""
+references: []

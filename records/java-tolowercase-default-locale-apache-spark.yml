@@ -1,0 +1,29 @@
+id: java-tolowercase-default-locale-apache-spark
+title: "Spark on a Turkish-locale JVM lowercases \"SERDEINFO\" to \"serdeınfo\" and breaks SQL/Hive metadata handling"
+language: java
+library: Apache Spark 2.1.0 (Scala, runs on the JVM String API)
+operation: lower
+letters: ["I", "ı", "i", "İ"]
+locale_dependent: true
+input: "\"SERDEINFO\".toLowerCase() and \"uniquetable\".toUpperCase() with OS regional setting Turkish"
+expected: "\"serdeinfo\", \"UNIQUETABLE\""
+actual: "\"serdeınfo\", \"UNİQUETABLE\"; internal identifiers no longer match"
+reproduction:
+  command: |
+    cat > J.java <<'EOF2'
+    public class J { public static void main(String[] a){ System.out.println("SERDEINFO".toLowerCase() + " " + "uniquetable".toUpperCase()); } }
+    EOF2
+    java -Duser.language=tr -Duser.country=TR -Dstdout.encoding=UTF-8 J.java
+    # prints: serdeınfo UNİQUETABLE
+  environment: "OpenJDK 21.0.12.1, Linux (mechanism only; Spark itself not run)"
+upstream:
+  url: https://issues.apache.org/jira/browse/SPARK-20156
+  status: fixed
+  fix: "Add Locale.ROOT to internal toLowerCase/toUpperCase calls (PR #17527, fix version 2.2.0). Workaround before the fix: -Duser.language=en -Duser.country=US on launch."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "Reporter Serkan Taş, 2017-03-30; resolved 2017-04-10. Duplicate SPARK-20361 (JVM locale affects SQL type names)."
+references:
+  - https://github.com/apache/spark/pull/17527

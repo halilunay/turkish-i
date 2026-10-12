@@ -1,0 +1,29 @@
+id: rust-to-lowercase-dotted-i
+title: "str::to_lowercase() maps \"İ\" to \"i\\u{307}\"; no locale-aware casing in std (request closed as not planned)"
+language: rust
+library: stdlib
+operation: lower
+letters: ["İ", "i", "I", "ı"]
+locale_dependent: false
+input: "\"İ\".to_lowercase(); the issue also asks for \"istanbul\".to_uppercase() under tr-TR"
+expected: "\"i\" for Turkish text; \"İSTANBUL\" for the uppercase request"
+actual: "\"i\\u{307}\" (2 chars); \"ISTANBUL\" (std applies only the locale-independent Unicode default mapping)"
+reproduction:
+  command: |
+    cat > r.rs <<'EOF2'
+    fn main(){ let l="İ".to_lowercase(); println!("{:?} {}", l, l.chars().count()); }
+    EOF2
+    rustc -o r r.rs && ./r
+    # prints: "i\u{307}" 2
+  environment: "rustc 1.97.0, Linux"
+upstream:
+  url: https://github.com/rust-lang/rust/issues/72966
+  status: wontfix
+  fix: "Closed 2024-01-10 as better suited for a crate; Rust team pointed to ICU4X. For the İ/i pair alone, strip U+0307 after to_lowercase()."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "Issue opened 2020-06-04 (author account now deleted)."
+references:
+  - https://github.com/unicode-org/icu4x

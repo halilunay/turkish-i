@@ -1,0 +1,26 @@
+id: javascript-tolocalelowercase-tr-locale-scule
+title: "scule case transforms (camelCase/kebabCase) produce ı/İ for users whose browser locale is Turkish"
+language: javascript
+library: scule (unjs)
+operation: lower
+letters: ["I", "ı", "i", "İ"]
+locale_dependent: true
+input: "an identifier containing \"I\" or \"i\" transformed with toLocaleLowerCase()/toLocaleUpperCase() while the user locale is tr"
+expected: "ASCII result, e.g. \"ITEM\" -> \"item\", \"item\" -> \"ITEM\" (identifiers are machine text, not Turkish prose)"
+actual: "\"ıtem\" and \"İTEM\": the locale-aware methods apply Turkish rules to code identifiers"
+reproduction:
+  command: |
+    node -e 'console.log("ITEM".toLocaleLowerCase("tr"), "item".toLocaleUpperCase("tr"), "ITEM".toLowerCase())'
+    # prints: ıtem İTEM item
+  environment: "Node v22.22.0, Linux (locale passed explicitly; in a browser the user's locale is used implicitly)"
+upstream:
+  url: https://github.com/unjs/scule/issues/8
+  status: fixed
+  fix: "Use the locale-independent toLowerCase()/toUpperCase() for identifiers (commit a0a6c06, scule >= 3.0.1). The mirror-image rule: for user-facing Turkish text use toLocaleLowerCase('tr')."
+verification:
+  status: verified
+  by: "claude-code (AI), reviewed by halilunay"
+  date: 2026-10-12
+  notes: "Mechanism reproduced on Node; the reporter's exact strings are only in a screenshot in the issue (not readable as text)."
+references:
+  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toLocaleLowerCase
