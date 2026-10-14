@@ -3,6 +3,7 @@ title: "grep -E '[a-zA-Z0-9_]' rejects every config key containing \"i\" under L
 language: bash
 library: gstack (bin/gstack-config)
 operation: regex-range
+kind: bug
 letters: ["i", "ı", "İ"]
 locale_dependent: true
 input: "key \"proactive\" validated with ^[a-zA-Z0-9_]+(@[a-zA-Z0-9]+)?$ under LANG=tr_TR.UTF-8"

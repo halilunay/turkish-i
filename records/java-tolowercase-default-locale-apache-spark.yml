@@ -3,6 +3,7 @@ title: "Spark on a Turkish-locale JVM lowercases \"SERDEINFO\" to \"serdeınfo\"
 language: java
 library: Apache Spark 2.1.0 (Scala, runs on the JVM String API)
 operation: lower
+kind: bug
 letters: ["I", "ı", "i", "İ"]
 locale_dependent: true
 input: "\"SERDEINFO\".toLowerCase() and \"uniquetable\".toUpperCase() with OS regional setting Turkish"
