@@ -17,6 +17,7 @@ GOOD = {
     "language": "python",
     "library": "stdlib",
     "operation": "lower",
+    "kind": "by-design",
     "letters": ["İ", "i"],
     "locale_dependent": False,
     "input": "İ",

@@ -3,6 +3,7 @@ title: "\"İ\".lower() returns two code points (\"i\" + U+0307), so \"KİTAP\".l
 language: python
 library: stdlib
 operation: lower
+kind: by-design
 letters: ["İ", "i"]
 locale_dependent: false
 input: "\"İ\" (U+0130), \"KİTAP\""
@@ -16,7 +17,7 @@ reproduction:
 upstream:
   url: https://github.com/python/cpython/issues/61454
   status: by-design
-  fix: "Closed as \"works for me\": lower() has no locale and follows the default Unicode mapping (U+0130 -> 0069 0307). For Turkish text use a locale-aware library (PyICU, Babel) or strip U+0307 after lower()/casefold() when İ/i is the only pair you need."
+  fix: "Closed as \"works for me\": lower() has no locale and applies the full default mapping (U+0130 -> 0069 0307). For Turkish text use a tr-tailored library (PyICU); for matching, normalize before and after folding (NFD -> casefold -> NFC, Unicode D145)."
 verification:
   status: verified
   by: "claude-code (AI), reviewed by halilunay"

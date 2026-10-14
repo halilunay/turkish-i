@@ -3,6 +3,7 @@ title: "str::to_lowercase() maps \"İ\" to \"i\\u{307}\"; no locale-aware casing
 language: rust
 library: stdlib
 operation: lower
+kind: by-design
 letters: ["İ", "i", "I", "ı"]
 locale_dependent: false
 input: "\"İ\".to_lowercase(); the issue also asks for \"istanbul\".to_uppercase() under tr-TR"
@@ -19,7 +20,7 @@ reproduction:
 upstream:
   url: https://github.com/rust-lang/rust/issues/72966
   status: wontfix
-  fix: "Closed 2024-01-10 as better suited for a crate; Rust team pointed to ICU4X. For the İ/i pair alone, strip U+0307 after to_lowercase()."
+  fix: "Closed 2024-01-10 as better suited for a crate; the Rust team pointed to ICU4X, which provides Turkish (tr) case mapping."
 verification:
   status: verified
   by: "claude-code (AI), reviewed by halilunay"

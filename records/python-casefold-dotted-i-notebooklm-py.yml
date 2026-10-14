@@ -3,10 +3,11 @@ title: "Title lookup by casefold() cannot find \"İstanbul notları\" with the q
 language: python
 library: notebooklm-py
 operation: casefold
+kind: expectation-gap
 letters: ["İ", "i"]
 locale_dependent: false
 input: "title \"İstanbul notları\", query \"istanbul\""
-expected: "query matches the title (same way \"STRASSE\" matches \"Straße\" in the same code)"
+expected: "query finds the title (a search-style expectation: default full case folding keeps İ and i distinct, while it does make \"STRASSE\" match \"Straße\")"
 actual: "NotebookNotFoundError; casefold() turns İ into \"i\" + U+0307, so the folded title starts with \"i̇\" and never equals or prefixes the folded query"
 reproduction:
   command: |
@@ -16,7 +17,7 @@ reproduction:
 upstream:
   url: https://github.com/teng-lin/notebooklm-py/issues/2476
   status: open
-  fix: "Open PR #2477 adds casefold_title(): text.casefold().replace(\"i\\u0307\", \"i\"), i.e. drop the combining dot after casefold. Two more call sites (studio title match, download --name filter) are still uncovered as of 2026-10-12."
+  fix: "Maintainer proposal (2026-10-14): tiered matching. Tier 1 NFD -> casefold -> NFC (Unicode D145; also fixes composed vs decomposed titles such as Café, the real conformance bug). Tier 2, only if tier 1 finds nothing: NFKD -> casefold -> drop combining marks -> NFC, with an error on ambiguous matches. Tier 2 makes İstanbul match istanbul but also şık match sık; neither tier makes IĞDIR match ığdır, which needs Turkish tailoring (e.g. a tr collator). PR #2477 (drop U+0307 after casefold) gives the same İ result as the simple mapping; the maintainer asked for the tiered approach instead (2026-10-14)."
 verification:
   status: verified
   by: "claude-code (AI), reviewed by halilunay"
@@ -24,4 +25,5 @@ verification:
   notes: "Runtime-level reproduction above; the full project-level reproduction (4 call sites, 204 tests) is in the issue and in PR #2477."
 references:
   - https://github.com/teng-lin/notebooklm-py/pull/2477
+  - https://github.com/teng-lin/notebooklm-py/issues/2476#issuecomment-6159774911
   - https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt

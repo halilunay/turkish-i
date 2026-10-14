@@ -3,10 +3,11 @@ title: "mb_strtolower(\"yİy\") returns \"yi̇y\" (i + U+0307) since PHP 7.3; 7.
 language: php
 library: stdlib (mbstring)
 operation: lower
+kind: by-design
 letters: ["İ", "i"]
 locale_dependent: false
 input: "\"yİy\""
-expected: "\"yiy\" (hex 796979), as PHP 7.2 returned"
+expected: "\"yiy\" (hex 796979), as PHP 7.2 returned; this is the Unicode simple lowercase mapping"
 actual: "\"yi̇y\" (hex 7969cc8779): PHP 7.3+ follows Unicode SpecialCasing, U+0130 -> 0069 0307"
 reproduction:
   command: |
@@ -16,10 +17,10 @@ reproduction:
 upstream:
   url: https://bugs.php.net/bug.php?id=78767
   status: by-design
-  fix: "Closed \"Not a bug\": the combining dot preserves round-tripping. Turkish rules can be enabled per request via mb_language() per the maintainer's note (not verified here); or strip U+0307 after lowering when only İ/i matters."
+  fix: "Closed \"Not a bug\": PHP 7.3+ applies the full mapping (SpecialCasing, 0130 -> 0069 0307). mb_convert_case($s, MB_CASE_LOWER_SIMPLE) applies the simple mapping and returns \"yiy\". mbstring has no Turkish tailoring; mb_language(\"Turkish\") does not change casing (tested on PHP 8.3.6); the mb_language idea in the bug thread was a suggestion, not a feature."
 verification:
   status: verified
   by: "claude-code (AI), reviewed by halilunay"
   date: 2026-10-12
-  notes: "Reporter meminaydin, 2019-10-31, PHP 7.3.11."
+  notes: "Reporter meminaydin, 2019-10-31, PHP 7.3.11. Re-run 2026-10-14: mb_convert_case(\"yİy\", MB_CASE_LOWER_SIMPLE) -> 796979."
 references: []

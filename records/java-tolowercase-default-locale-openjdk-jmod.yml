@@ -3,6 +3,7 @@ title: "jmod \"list\" mode and jimage list --help not recognised when the JVM de
 language: java
 library: "stdlib (jdk.jlink: jmod, jimage)"
 operation: lower
+kind: bug
 letters: ["I", "ı"]
 locale_dependent: true
 input: "\"LIST\".toLowerCase() with default locale tr_TR"

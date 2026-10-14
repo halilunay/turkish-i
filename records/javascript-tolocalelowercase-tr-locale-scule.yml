@@ -3,6 +3,7 @@ title: "scule case transforms (camelCase/kebabCase) produce ı/İ for users whos
 language: javascript
 library: scule (unjs)
 operation: lower
+kind: bug
 letters: ["I", "ı", "i", "İ"]
 locale_dependent: true
 input: "an identifier containing \"I\" or \"i\" transformed with toLocaleLowerCase()/toLocaleUpperCase() while the user locale is tr"
