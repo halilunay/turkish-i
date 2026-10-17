@@ -1,0 +1,31 @@
+id: java-touppercase-locale-emulation-gwt
+title: "GWT String.toUpperCase() emulation uses JS toLocaleUpperCase() and converts \"i\" to \"İ\" on Turkish locales"
+language: java
+library: GWT (Google Web Toolkit) 2.8.0
+operation: upper
+kind: bug
+letters: ["I", "i", "İ", "ı"]
+locale_dependent: true
+input: "\"i\".toUpperCase() in GWT client code running in a browser with a Turkish locale"
+expected: "\"I\" (locale-independent ASCII uppercase per GWT String emulation design)"
+actual: "\"İ\" (U+0130 Latin Capital Letter I with Dot Above, due to JS toLocaleUpperCase() call)"
+reproduction:
+  command: |
+    # In GWT 2.8.0, String.toUpperCase() in java/lang/String.java was implemented as:
+    #   public String toUpperCase() { return asNativeString().toLocaleUpperCase(); }
+    # Under a Turkish locale, JavaScript toLocaleUpperCase() converts "i" to "İ":
+    node -e 'console.log("i".toLocaleUpperCase("tr-TR"), "i".toUpperCase())'
+    # prints: İ I
+  environment: "Node v24.21.0, Windows (mechanism reproduction showing JS toLocaleUpperCase vs toUpperCase)"
+upstream:
+  url: https://github.com/gwtproject/gwt/issues/9540
+  status: fixed
+  fix: "Restore locale-independent String.toUpperCase() emulation by calling asNativeString().toUpperCase() instead of toLocaleUpperCase() (commit 7e730fe, fixed in GWT 2.8.2). Workaround: use explicit locale such as Locale.ROOT or toUpperCase(Locale.ROOT)."
+verification:
+  status: unverified
+  by: "Samran Asif"
+  date: 2026-10-16
+  notes: "GWT issue 9540 reported by srkprasadam, targeted to 2.8.2"
+references:
+  - https://github.com/gwtproject/gwt/issues/9540
+  - https://github.com/gwtproject/gwt/commit/7e730fe14c533c2975dd77554ad738b28773ec0e
