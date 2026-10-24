@@ -25,7 +25,7 @@ verification:
   status: unverified
   by: "antigravity (AI), reviewed by webdevsamran"
   date: 2026-10-16
-  notes: "GWT issue 9540 reported by srkprasadam, targeted to 2.8.2"
+  notes: "GWT issue 9540 reported by srkprasadam, targeted to 2.8.2. Unverified because GWT itself was not run; the reproduction only shows the JavaScript mechanism (toLocaleUpperCase vs toUpperCase) in Node."
 references:
   - https://github.com/gwtproject/gwt/issues/9540
   - https://github.com/gwtproject/gwt/commit/7e730fe14c533c2975dd77554ad738b28773ec0e
